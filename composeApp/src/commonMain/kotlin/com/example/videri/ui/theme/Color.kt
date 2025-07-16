@@ -9,7 +9,7 @@ object LightColors {
     val Secondary = Color(0xFF74B9FF)
     val SecondaryVariant = Color(0xFF0984E3)
     val Background = Color(0xFFF8F9FA)
-    val Surface = Color(0xFFFFFFFF)
+    val Surface = Color(0xFFFf5f2fd)
     val SurfaceVariant = Color(0xFFF1F3F4)
     val Error = Color(0xFFE74C3C)
     val OnPrimary = Color(0xFFFFFFFF)

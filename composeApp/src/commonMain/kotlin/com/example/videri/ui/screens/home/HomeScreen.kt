@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -48,9 +49,13 @@ fun HomeScreen(
     onMovieClick: (String) -> Unit,
     onTVShowClick: (String) -> Unit,
     onSeeAllClick: (String) -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier = Modifier,
     userName: String = "User"
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+    var showSearchOverlay by remember { mutableStateOf(false) }
     // Mock data
     val trendingMovies = remember {
         listOf(
@@ -156,40 +161,11 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState())
     ) {
         // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = "Good evening,",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = userName,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            
-            // Profile placeholder
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "👤",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            }
-        }
+        AppHeader(
+            title = "Videri",
+            onSearchClick = { showSearchOverlay = true },
+            onProfileClick = onOpenProfile
+        )
         
         Spacer(modifier = Modifier.height(8.dp))
         
@@ -378,6 +354,14 @@ fun HomeScreen(
         }
         
         Spacer(modifier = Modifier.height(16.dp))
+        
+        // Search Overlay
+        SearchOverlay(
+            isVisible = showSearchOverlay,
+            onDismiss = { showSearchOverlay = false },
+            onMovieClick = onMovieClick,
+            onTVShowClick = onTVShowClick
+        )
     }
 }
 

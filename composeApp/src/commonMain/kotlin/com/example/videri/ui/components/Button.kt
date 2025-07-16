@@ -47,10 +47,16 @@ fun VideriButton(
             contentColor = MaterialTheme.colorScheme.primary,
             disabledContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
         )
+        ButtonVariant.Google -> ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Color.Black,
+            disabledContainerColor = Color.White.copy(alpha = 0.6f),
+            disabledContentColor = Color.Black.copy(alpha = 0.6f)
+        )
     }
 
     when (variant) {
-        ButtonVariant.Primary, ButtonVariant.Secondary -> {
+        ButtonVariant.Primary, ButtonVariant.Secondary, ButtonVariant.Google -> {
             Button(
                 onClick = onClick,
                 modifier = modifier,
@@ -62,7 +68,7 @@ fun VideriButton(
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(16.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = if (variant == ButtonVariant.Google) Color.Black else MaterialTheme.colorScheme.onPrimary,
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -162,5 +168,6 @@ enum class ButtonVariant {
     Primary,
     Secondary,
     Outline,
-    Text
+    Text,
+    Google
 }

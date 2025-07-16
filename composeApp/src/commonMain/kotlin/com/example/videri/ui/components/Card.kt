@@ -11,11 +11,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.videri.ui.theme.extendedColors
+import com.example.videri.ui.icons.LineIcons
+
+@Composable
+fun LineIconStatusChip(
+    icon: ImageVector,
+    backgroundColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .padding(4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = contentColor,
+            modifier = Modifier.size(12.dp)
+        )
+    }
+}
 
 @Composable
 fun MovieCard(
@@ -37,8 +60,8 @@ fun MovieCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp,
-            pressedElevation = 12.dp
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp
         )
     ) {
         Column {
@@ -55,10 +78,11 @@ fun MovieCard(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "🎬",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    Icon(
+                        imageVector = LineIcons.Movie,
+                        contentDescription = "Movie poster",
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 }
                 
@@ -70,15 +94,15 @@ fun MovieCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     if (isWatched) {
-                        StatusChip(
-                            text = "✓",
+                        LineIconStatusChip(
+                            icon = LineIcons.Check,
                             backgroundColor = MaterialTheme.extendedColors.watched,
                             contentColor = Color.White
                         )
                     }
                     if (isInWatchlist) {
-                        StatusChip(
-                            text = "📌",
+                        LineIconStatusChip(
+                            icon = LineIcons.Bookmark,
                             backgroundColor = MaterialTheme.extendedColors.watchlist,
                             contentColor = Color.White
                         )
@@ -97,12 +121,23 @@ fun MovieCard(
                             )
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Text(
-                            text = "⭐ ${rating.toString().take(3)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.extendedColors.rating,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Icon(
+                                imageVector = LineIcons.Star,
+                                contentDescription = null,
+                                tint = MaterialTheme.extendedColors.rating,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = rating.toString().take(3),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.extendedColors.rating,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -154,8 +189,8 @@ fun TVShowCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 8.dp,
-            pressedElevation = 12.dp
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp
         )
     ) {
         Column {
@@ -172,10 +207,11 @@ fun TVShowCard(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "📺",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    Icon(
+                        imageVector = LineIcons.Television,
+                        contentDescription = "TV show poster",
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 }
                 
@@ -187,15 +223,15 @@ fun TVShowCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     if (isWatched) {
-                        StatusChip(
-                            text = "✓",
+                        LineIconStatusChip(
+                            icon = LineIcons.Check,
                             backgroundColor = MaterialTheme.extendedColors.watched,
                             contentColor = Color.White
                         )
                     }
                     if (isInWatchlist) {
-                        StatusChip(
-                            text = "📌",
+                        LineIconStatusChip(
+                            icon = LineIcons.Bookmark,
                             backgroundColor = MaterialTheme.extendedColors.watchlist,
                             contentColor = Color.White
                         )
@@ -214,12 +250,23 @@ fun TVShowCard(
                             )
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
-                        Text(
-                            text = "⭐ ${rating.toString().take(3)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.extendedColors.rating,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Icon(
+                                imageVector = LineIcons.Star,
+                                contentDescription = null,
+                                tint = MaterialTheme.extendedColors.rating,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = rating.toString().take(3),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.extendedColors.rating,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
             }
@@ -245,13 +292,13 @@ fun TVShowCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
-                episodeProgress?.let { progress ->
+                // Episode progress
+                if (episodeProgress != null) {
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = progress,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.extendedColors.inProgress,
-                        fontWeight = FontWeight.Medium
+                        text = episodeProgress,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -260,39 +307,18 @@ fun TVShowCard(
 }
 
 @Composable
-fun StatusChip(
-    text: String,
-    backgroundColor: Color,
-    contentColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .background(backgroundColor, RoundedCornerShape(12.dp))
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = contentColor,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
 fun ContentCard(
     title: String,
-    description: String,
-    imageUrl: String?,
+    posterUrl: String?,
     rating: Float,
-    year: String,
+    releaseYear: String,
+    description: String,
     genres: List<String>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isWatched: Boolean = false,
-    isInWatchlist: Boolean = false
+    isInWatchlist: Boolean = false,
+    type: String = "movie" // "movie" or "tv"
 ) {
     Card(
         modifier = modifier
@@ -303,8 +329,8 @@ fun ContentCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp,
-            pressedElevation = 8.dp
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp
         )
     ) {
         Row(
@@ -313,15 +339,17 @@ fun ContentCard(
             // Poster
             Box(
                 modifier = Modifier
-                    .size(width = 80.dp, height = 120.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .width(80.dp)
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "🎬",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                Icon(
+                    imageVector = if (type == "movie") LineIcons.Movie else LineIcons.Television,
+                    contentDescription = "$type poster",
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
             }
             
@@ -331,7 +359,7 @@ fun ContentCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // Title and status
+                // Header with title and status
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -342,24 +370,25 @@ fun ContentCard(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f),
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
                     
+                    // Status indicators
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         if (isWatched) {
-                            StatusChip(
-                                text = "✓",
+                            LineIconStatusChip(
+                                icon = LineIcons.Check,
                                 backgroundColor = MaterialTheme.extendedColors.watched,
                                 contentColor = Color.White
                             )
                         }
                         if (isInWatchlist) {
-                            StatusChip(
-                                text = "📌",
+                            LineIconStatusChip(
+                                icon = LineIcons.Bookmark,
                                 backgroundColor = MaterialTheme.extendedColors.watchlist,
                                 contentColor = Color.White
                             )
@@ -372,28 +401,30 @@ fun ContentCard(
                 // Year and rating
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = year,
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = releaseYear,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     
                     if (rating > 0) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Text(
-                                text = "⭐",
-                                style = MaterialTheme.typography.bodySmall
+                            Icon(
+                                imageVector = LineIcons.Star,
+                                contentDescription = null,
+                                tint = MaterialTheme.extendedColors.rating,
+                                modifier = Modifier.size(12.dp)
                             )
                             Text(
                                 text = rating.toString().take(3),
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.extendedColors.rating,
-                                fontWeight = FontWeight.Medium
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
@@ -431,6 +462,27 @@ fun ContentCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun StatusChip(
+    text: String,
+    backgroundColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .padding(horizontal = 6.dp, vertical = 3.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelSmall,
+            color = contentColor,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 

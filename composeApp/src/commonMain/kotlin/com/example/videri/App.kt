@@ -2,6 +2,7 @@ package com.example.videri
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,13 +14,28 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     VideriTheme {
+        val backgroundColor = MaterialTheme.colorScheme.background
+        val surfaceColor = MaterialTheme.colorScheme.surface
+        
+        // Set system bars colors to match the actual theme colors
+        SetSystemBarsColor(
+            statusBarColor = backgroundColor,
+            navigationBarColor = backgroundColor
+        )
+        
         Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .safeDrawingPadding(),
-            color = androidx.compose.material3.MaterialTheme.colorScheme.background
+            color = backgroundColor
         ) {
             AppNavigation()
         }
     }
 }
+
+@Composable
+expect fun SetSystemBarsColor(
+    statusBarColor: androidx.compose.ui.graphics.Color,
+    navigationBarColor: androidx.compose.ui.graphics.Color
+)

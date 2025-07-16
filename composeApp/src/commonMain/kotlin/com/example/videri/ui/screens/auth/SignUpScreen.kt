@@ -18,178 +18,6 @@ import com.example.videri.ui.components.*
 import com.example.videri.ui.theme.GradientColors
 
 @Composable
-fun LoginScreen(
-    onLoginClick: (String, String) -> Unit,
-    onSignUpClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    errorMessage: String? = null
-) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember { mutableStateOf<String?>(null) }
-
-    fun validateForm(): Boolean {
-        emailError = when {
-            email.isBlank() -> "Email is required"
-            !email.contains("@") -> "Please enter a valid email"
-            else -> null
-        }
-
-        passwordError = when {
-            password.isBlank() -> "Password is required"
-            password.length < 6 -> "Password must be at least 6 characters"
-            else -> null
-        }
-
-        return emailError == null && passwordError == null
-    }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Logo/Title
-        Text(
-            text = "🎬",
-            style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Videri",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Track your favorite movies and TV shows",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        // Login Form
-        
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-            Text(
-                text = "Welcome back!",
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            VideriTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    emailError = null
-                },
-                label = "Email",
-                placeholder = "Enter your email",
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next,
-                isError = emailError != null,
-                errorMessage = emailError
-            )
-
-            VideriTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    passwordError = null
-                },
-                label = "Password",
-                placeholder = "Enter your password",
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done,
-                visualTransformation = PasswordVisualTransformation(),
-                isError = passwordError != null,
-                errorMessage = passwordError
-            )
-
-            if (errorMessage != null) {
-                Text(
-                    text = errorMessage,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            VideriButton(
-                onClick = {
-                    if (validateForm()) {
-                        onLoginClick(email, password)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                isLoading = isLoading,
-                // gradient = GradientColors.PrimaryGradient
-            ) {
-                Text(
-                    text = "Log In",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-
-            VideriButton(
-                onClick = onForgotPasswordClick,
-                modifier = Modifier.fillMaxWidth(),
-                variant = ButtonVariant.Text
-            ) {
-                Text("Forgot Password?")
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-
-            // Sign Up
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Don't have an account? ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                VideriButton(
-                    onClick = onSignUpClick,
-                    variant = ButtonVariant.Text
-                ) {
-                    Text(
-                        text = "Sign Up",
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-        }
-    }
-
-
-@Composable
 fun SignUpScreen(
     onSignUpClick: (String, String, String) -> Unit,
     onLoginClick: () -> Unit,
@@ -270,10 +98,10 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         // Sign Up Form
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             Text(
                 text = "Create Account",
                 style = MaterialTheme.typography.headlineSmall,
@@ -359,7 +187,6 @@ fun SignUpScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 isLoading = isLoading,
-                // gradient = GradientColors.PrimaryGradient
             ) {
                 Text(
                     text = "Sign Up",
@@ -367,11 +194,6 @@ fun SignUpScreen(
                     fontWeight = FontWeight.SemiBold
                 )
             }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-
-            // Login
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -394,4 +216,4 @@ fun SignUpScreen(
             }
         }
     }
-
+}

@@ -3,6 +3,7 @@ package com.example.videri.ui.screens.library
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,9 +18,13 @@ import com.example.videri.ui.screens.home.TVShow
 fun LibraryScreen(
     onMovieClick: (String) -> Unit,
     onTVShowClick: (String) -> Unit,
+    onOpenProfile: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableStateOf(0) }
+    var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+    var showSearchOverlay by remember { mutableStateOf(false) }
     val tabs = listOf("Watchlist", "Watched", "Lists")
     
     // Mock data
@@ -77,25 +82,11 @@ fun LibraryScreen(
         modifier = modifier.fillMaxSize()
     ) {
         // Header
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Your Library",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Tab Row
-            TabRow(
-                selectedIndex = selectedTab,
-                tabs = tabs,
-                onTabSelected = { selectedTab = it }
-            )
-        }
+        AppHeader(
+            title = "Your Library",
+            onSearchClick = { showSearchOverlay = true },
+            onProfileClick = onOpenProfile
+        )
         
         // Content
         when (selectedTab) {
@@ -109,13 +100,14 @@ fun LibraryScreen(
                             ContentCard(
                                 title = movie.title,
                                 description = movie.description,
-                                imageUrl = movie.posterUrl,
+                                posterUrl = movie.posterUrl,
                                 rating = movie.rating,
-                                year = movie.releaseYear,
+                                releaseYear = movie.releaseYear,
                                 genres = movie.genres,
                                 onClick = { onMovieClick(movie.id) },
                                 isWatched = movie.isWatched,
-                                isInWatchlist = movie.isInWatchlist
+                                isInWatchlist = movie.isInWatchlist,
+                                type = "movie"
                             )
                         }
                     }
@@ -145,13 +137,14 @@ fun LibraryScreen(
                             ContentCard(
                                 title = movie.title,
                                 description = movie.description,
-                                imageUrl = movie.posterUrl,
+                                posterUrl = movie.posterUrl,
                                 rating = movie.rating,
-                                year = movie.releaseYear,
+                                releaseYear = movie.releaseYear,
                                 genres = movie.genres,
                                 onClick = { onMovieClick(movie.id) },
                                 isWatched = movie.isWatched,
-                                isInWatchlist = movie.isInWatchlist
+                                isInWatchlist = movie.isInWatchlist,
+                                type = "movie"
                             )
                         }
                     }
@@ -188,4 +181,12 @@ fun LibraryScreen(
             }
         }
     }
+    
+    // Search Overlay
+    SearchOverlay(
+        isVisible = showSearchOverlay,
+        onDismiss = { showSearchOverlay = false },
+        onMovieClick = onMovieClick,
+        onTVShowClick = onTVShowClick
+    )
 }
