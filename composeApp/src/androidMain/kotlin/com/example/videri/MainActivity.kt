@@ -11,9 +11,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Enable edge-to-edge display but let our composable handle the colors
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        
+
         setContent {
             App()
         }
