@@ -1,6 +1,7 @@
 package com.example.videri.ui.screens.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,50 +19,97 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.videri.ui.components.*
-import com.example.videri.ui.screens.home.Movie
+import com.example.videri.data.models.Movie
 import com.example.videri.ui.theme.extendedColors
 import com.example.videri.ui.icons.LineIcons
+import com.example.videri.ui.viewmodels.MovieDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(
-    movie: Movie,
+    movieId: String,
+    viewModel: MovieDetailViewModel,
     onBackClick: () -> Unit,
-    onWatchlistToggle: (Boolean) -> Unit,
-    onWatchedToggle: (Boolean) -> Unit,
-    onRatingChange: (Float) -> Unit,
     onAddToList: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var userRating by remember { mutableStateOf(0f) }
-    var userReview by remember { mutableStateOf("") }
-    var isWatched by remember { mutableStateOf(movie.isWatched) }
-    var isInWatchlist by remember { mutableStateOf(movie.isInWatchlist) }
+    val uiState = viewModel.uiState
     
-    // Mock additional data
-    val cast = remember {
-        listOf(
-            "Christian Bale" to "Bruce Wayne / Batman",
-            "Heath Ledger" to "Joker",
-            "Aaron Eckhart" to "Harvey Dent",
-            "Maggie Gyllenhaal" to "Rachel Dawes",
-            "Gary Oldman" to "Commissioner Gordon"
-        )
+    LaunchedEffect(movieId) {
+        viewModel.loadMovie(movieId)
     }
     
-    val crew = remember {
-        listOf(
-            "Christopher Nolan" to "Director",
-            "David S. Goyer" to "Writer",
-            "Emma Thomas" to "Producer",
-            "Wally Pfister" to "Cinematographer",
-            "Hans Zimmer" to "Music"
-        )
+    when {
+        uiState.isLoading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        
+        uiState.error != null -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Error: ${uiState.error}",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    VideriButton(
+                        onClick = { viewModel.loadMovie(movieId) },
+                        variant = ButtonVariant.Primary
+                    ) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
+        
+        uiState.movie != null -> {
+            MovieDetailContent(
+                movie = uiState.movie,
+                isWatched = uiState.isWatched,
+                isInWatchlist = uiState.isInWatchlist,
+                userRating = uiState.userRating,
+                userReview = uiState.userReview,
+                similarMovies = uiState.similarMovies,
+                onBackClick = onBackClick,
+                onWatchlistToggle = { viewModel.toggleWatchlist() },
+                onWatchedToggle = { viewModel.toggleWatched() },
+                onRatingChange = { viewModel.updateUserRating(it) },
+                onReviewChange = { viewModel.updateUserReview(it) },
+                onAddToList = onAddToList,
+                modifier = modifier
+            )
+        }
     }
-    
-    val runtime = "152 minutes"
-    val budget = "$185 million"
-    val boxOffice = "$1.005 billion"
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MovieDetailContent(
+    movie: Movie,
+    isWatched: Boolean,
+    isInWatchlist: Boolean,
+    userRating: Float,
+    userReview: String,
+    similarMovies: List<Movie>,
+    onBackClick: () -> Unit,
+    onWatchlistToggle: () -> Unit,
+    onWatchedToggle: () -> Unit,
+    onRatingChange: (Float) -> Unit,
+    onReviewChange: (String) -> Unit,
+    onAddToList: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     
     Column(
         modifier = modifier.fillMaxSize()
@@ -99,17 +147,11 @@ fun MovieDetailScreen(
             // Hero Section
             MovieHeroSection(
                 movie = movie,
-                runtime = runtime,
+                runtime = movie.runtime?.let { "${it} minutes" } ?: "Unknown",
                 isWatched = isWatched,
                 isInWatchlist = isInWatchlist,
-                onWatchlistToggle = { 
-                    isInWatchlist = !isInWatchlist
-                    onWatchlistToggle(isInWatchlist)
-                },
-                onWatchedToggle = { 
-                    isWatched = !isWatched
-                    onWatchedToggle(isWatched)
-                }
+                onWatchlistToggle = onWatchlistToggle,
+                onWatchedToggle = onWatchedToggle
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -118,11 +160,8 @@ fun MovieDetailScreen(
             UserRatingSection(
                 userRating = userRating,
                 userReview = userReview,
-                onRatingChange = { rating ->
-                    userRating = rating
-                    onRatingChange(rating)
-                },
-                onReviewChange = { userReview = it }
+                onRatingChange = onRatingChange,
+                onReviewChange = onReviewChange
             )
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -135,25 +174,36 @@ fun MovieDetailScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             // Cast Section
-            CastSection(cast = cast)
-            
-            Spacer(modifier = Modifier.height(24.dp))
+            if (movie.cast.isNotEmpty()) {
+                CastSection(cast = movie.cast.map { it.name to it.character })
+                Spacer(modifier = Modifier.height(24.dp))
+            }
             
             // Crew Section
-            CrewSection(crew = crew)
-            
-            Spacer(modifier = Modifier.height(24.dp))
+            if (movie.crew.isNotEmpty()) {
+                CrewSection(crew = movie.crew.map { it.name to it.job })
+                Spacer(modifier = Modifier.height(24.dp))
+            }
             
             // Movie Details Section
             MovieDetailsSection(
                 releaseDate = movie.releaseYear,
-                runtime = runtime,
-                budget = budget,
-                boxOffice = boxOffice,
+                runtime = movie.runtime?.let { "${it} minutes" } ?: "Unknown",
+                budget = movie.budget?.let { "$${it / 1_000_000}M" } ?: "Unknown",
+                boxOffice = movie.boxOffice?.let { "$${it / 1_000_000}M" } ?: "Unknown",
                 genres = movie.genres
             )
             
             Spacer(modifier = Modifier.height(24.dp))
+            
+            // Similar Movies Section
+            if (similarMovies.isNotEmpty()) {
+                SimilarMoviesSection(
+                    similarMovies = similarMovies,
+                    onMovieClick = { /* TODO: Navigate to movie */ }
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
             
             // Action Section
             ActionSection(
@@ -537,6 +587,70 @@ private fun ActionSection(
                 modifier = Modifier.weight(1f)
             ) {
                 Text("Share")
+            }
+        }
+    }
+}
+
+@Composable
+private fun SimilarMoviesSection(
+    similarMovies: List<Movie>,
+    onMovieClick: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = "Similar Movies",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.SemiBold
+        )
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            similarMovies.take(3).forEach { movie ->
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onMovieClick(movie.id) }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = LineIcons.Movie,
+                            contentDescription = "Movie poster",
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = movie.title,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        fontWeight = FontWeight.Medium
+                    )
+                    
+                    Text(
+                        text = movie.releaseYear,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

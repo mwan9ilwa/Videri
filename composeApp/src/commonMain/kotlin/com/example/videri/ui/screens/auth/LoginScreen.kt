@@ -28,8 +28,8 @@ fun LoginScreen(
     isGoogleSignInLoading: Boolean = false,
     errorMessage: String? = null
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("test@example.com") } // Pre-fill for demo
+    var password by remember { mutableStateOf("password123") } // Pre-fill for demo
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 

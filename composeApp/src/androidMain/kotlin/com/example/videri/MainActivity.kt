@@ -14,7 +14,8 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            App()
+            val application = application as VideriApplication
+            App(dependencyContainer = application.dependencyContainer)
         }
     }
 }

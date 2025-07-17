@@ -1,0 +1,260 @@
+-- Movies table
+CREATE TABLE Movie (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    poster_url TEXT,
+    backdrop_url TEXT,
+    rating REAL NOT NULL,
+    release_year TEXT NOT NULL,
+    description TEXT NOT NULL,
+    genres TEXT NOT NULL, -- JSON array as string
+    runtime INTEGER,
+    budget INTEGER,
+    box_office INTEGER,
+    cast TEXT, -- JSON array as string
+    crew TEXT, -- JSON array as string
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TV Shows table
+CREATE TABLE TVShow (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    poster_url TEXT,
+    backdrop_url TEXT,
+    rating REAL NOT NULL,
+    release_year TEXT NOT NULL,
+    description TEXT NOT NULL,
+    genres TEXT NOT NULL, -- JSON array as string
+    status TEXT NOT NULL,
+    total_seasons INTEGER,
+    total_episodes INTEGER,
+    seasons TEXT, -- JSON array as string
+    cast TEXT, -- JSON array as string
+    crew TEXT, -- JSON array as string
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User watchlist
+CREATE TABLE WatchlistItem (
+    id TEXT NOT NULL PRIMARY KEY,
+    content_id TEXT NOT NULL,
+    content_type TEXT NOT NULL, -- 'MOVIE' or 'TV_SHOW'
+    added_date TEXT NOT NULL,
+    UNIQUE(content_id, content_type)
+);
+
+-- User watched items
+CREATE TABLE WatchedItem (
+    id TEXT NOT NULL PRIMARY KEY,
+    content_id TEXT NOT NULL,
+    content_type TEXT NOT NULL, -- 'MOVIE' or 'TV_SHOW'
+    watched_date TEXT NOT NULL,
+    user_rating REAL,
+    user_review TEXT,
+    UNIQUE(content_id, content_type)
+);
+
+-- User custom lists
+CREATE TABLE CustomList (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    is_public INTEGER NOT NULL DEFAULT 0, -- SQLite boolean as integer
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    content_count INTEGER NOT NULL DEFAULT 0
+);
+
+-- Content in custom lists
+CREATE TABLE CustomListContent (
+    id TEXT NOT NULL PRIMARY KEY,
+    list_id TEXT NOT NULL,
+    content_id TEXT NOT NULL,
+    content_type TEXT NOT NULL, -- 'MOVIE' or 'TV_SHOW'
+    added_date TEXT NOT NULL,
+    FOREIGN KEY(list_id) REFERENCES CustomList(id) ON DELETE CASCADE,
+    UNIQUE(list_id, content_id, content_type)
+);
+
+-- Episode watch tracking
+CREATE TABLE WatchedEpisode (
+    id TEXT NOT NULL PRIMARY KEY,
+    episode_id TEXT NOT NULL,
+    tvshow_id TEXT NOT NULL,
+    season_number INTEGER NOT NULL,
+    episode_number INTEGER NOT NULL,
+    watched_date TEXT NOT NULL,
+    user_rating REAL,
+    UNIQUE(episode_id)
+);
+
+-- User ratings
+CREATE TABLE UserRating (
+    id TEXT NOT NULL PRIMARY KEY,
+    content_id TEXT NOT NULL,
+    content_type TEXT NOT NULL, -- 'MOVIE' or 'TV_SHOW'
+    rating REAL NOT NULL,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    UNIQUE(content_id, content_type)
+);
+
+-- User reviews
+CREATE TABLE UserReview (
+    id TEXT NOT NULL PRIMARY KEY,
+    content_id TEXT NOT NULL,
+    content_type TEXT NOT NULL, -- 'MOVIE' or 'TV_SHOW'
+    review TEXT NOT NULL,
+    created_date TEXT NOT NULL,
+    updated_date TEXT NOT NULL,
+    UNIQUE(content_id, content_type)
+);
+
+-- User preferences
+CREATE TABLE UserPreferences (
+    id TEXT NOT NULL PRIMARY KEY DEFAULT 'user_prefs',
+    favorite_genres TEXT, -- JSON array as string
+    disliked_genres TEXT, -- JSON array as string
+    preferred_languages TEXT, -- JSON array as string
+    adult_content INTEGER NOT NULL DEFAULT 0, -- SQLite boolean as integer
+    notifications_enabled INTEGER NOT NULL DEFAULT 1, -- SQLite boolean as integer
+    updated_date TEXT NOT NULL
+);
+
+-- Queries for Movies
+insertMovie:
+INSERT OR REPLACE INTO Movie (id, title, poster_url, backdrop_url, rating, release_year, description, genres, runtime, budget, box_office, cast, crew, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectMovieById:
+SELECT * FROM Movie WHERE id = ?;
+
+selectAllMovies:
+SELECT * FROM Movie ORDER BY updated_at DESC;
+
+searchMovies:
+SELECT * FROM Movie 
+WHERE title LIKE '%' || ? || '%' 
+   OR description LIKE '%' || ? || '%'
+ORDER BY rating DESC;
+
+-- Queries for TV Shows
+insertTVShow:
+INSERT OR REPLACE INTO TVShow (id, title, poster_url, backdrop_url, rating, release_year, description, genres, status, total_seasons, total_episodes, seasons, cast, crew, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectTVShowById:
+SELECT * FROM TVShow WHERE id = ?;
+
+selectAllTVShows:
+SELECT * FROM TVShow ORDER BY updated_at DESC;
+
+searchTVShows:
+SELECT * FROM TVShow 
+WHERE title LIKE '%' || ? || '%' 
+   OR description LIKE '%' || ? || '%'
+ORDER BY rating DESC;
+
+-- Queries for Watchlist
+insertWatchlistItem:
+INSERT OR REPLACE INTO WatchlistItem (id, content_id, content_type, added_date)
+VALUES (?, ?, ?, ?);
+
+removeWatchlistItem:
+DELETE FROM WatchlistItem WHERE content_id = ? AND content_type = ?;
+
+selectWatchlistItems:
+SELECT * FROM WatchlistItem ORDER BY added_date DESC;
+
+isInWatchlist:
+SELECT COUNT(*) FROM WatchlistItem WHERE content_id = ? AND content_type = ?;
+
+-- Queries for Watched Items
+insertWatchedItem:
+INSERT OR REPLACE INTO WatchedItem (id, content_id, content_type, watched_date, user_rating, user_review)
+VALUES (?, ?, ?, ?, ?, ?);
+
+removeWatchedItem:
+DELETE FROM WatchedItem WHERE content_id = ? AND content_type = ?;
+
+selectWatchedItems:
+SELECT * FROM WatchedItem ORDER BY watched_date DESC;
+
+isWatched:
+SELECT COUNT(*) FROM WatchedItem WHERE content_id = ? AND content_type = ?;
+
+-- Queries for Custom Lists
+insertCustomList:
+INSERT INTO CustomList (id, name, description, is_public, created_date, updated_date)
+VALUES (?, ?, ?, ?, ?, ?);
+
+updateCustomList:
+UPDATE CustomList 
+SET name = ?, description = ?, is_public = ?, updated_date = ?
+WHERE id = ?;
+
+deleteCustomList:
+DELETE FROM CustomList WHERE id = ?;
+
+selectCustomLists:
+SELECT * FROM CustomList ORDER BY updated_date DESC;
+
+selectCustomListById:
+SELECT * FROM CustomList WHERE id = ?;
+
+-- Queries for Custom List Content
+insertCustomListContent:
+INSERT OR REPLACE INTO CustomListContent (id, list_id, content_id, content_type, added_date)
+VALUES (?, ?, ?, ?, ?);
+
+removeCustomListContent:
+DELETE FROM CustomListContent WHERE list_id = ? AND content_id = ? AND content_type = ?;
+
+selectCustomListContent:
+SELECT * FROM CustomListContent WHERE list_id = ? ORDER BY added_date DESC;
+
+updateCustomListContentCount:
+UPDATE CustomList 
+SET content_count = (SELECT COUNT(*) FROM CustomListContent WHERE list_id = ?), updated_date = ?
+WHERE id = ?;
+
+-- Queries for Episode Tracking
+insertWatchedEpisode:
+INSERT OR REPLACE INTO WatchedEpisode (id, episode_id, tvshow_id, season_number, episode_number, watched_date, user_rating)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+removeWatchedEpisode:
+DELETE FROM WatchedEpisode WHERE episode_id = ?;
+
+selectWatchedEpisodes:
+SELECT * FROM WatchedEpisode WHERE tvshow_id = ? ORDER BY season_number, episode_number;
+
+isEpisodeWatched:
+SELECT COUNT(*) FROM WatchedEpisode WHERE episode_id = ?;
+
+-- Queries for Ratings
+insertOrUpdateRating:
+INSERT OR REPLACE INTO UserRating (id, content_id, content_type, rating, created_date, updated_date)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectRating:
+SELECT rating FROM UserRating WHERE content_id = ? AND content_type = ?;
+
+-- Queries for Reviews
+insertOrUpdateReview:
+INSERT OR REPLACE INTO UserReview (id, content_id, content_type, review, created_date, updated_date)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectReview:
+SELECT review FROM UserReview WHERE content_id = ? AND content_type = ?;
+
+-- Queries for User Preferences
+insertOrUpdateUserPreferences:
+INSERT OR REPLACE INTO UserPreferences (id, favorite_genres, disliked_genres, preferred_languages, adult_content, notifications_enabled, updated_date)
+VALUES ('user_prefs', ?, ?, ?, ?, ?, ?);
+
+selectUserPreferences:
+SELECT * FROM UserPreferences WHERE id = 'user_prefs';

@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,6 +31,10 @@ import com.example.videri.ui.icons.LineIcons
 import com.example.videri.ui.components.ProfileSideSheet
 import com.example.videri.ui.components.AppHeader
 import com.example.videri.ui.components.SearchOverlay
+import com.example.videri.data.di.DependencyContainer
+import com.example.videri.ui.viewmodels.AuthViewModel
+import com.example.videri.ui.viewmodels.MovieDetailViewModel
+import kotlinx.coroutines.CoroutineScope
 
 enum class AuthScreen {
     Login,
@@ -48,8 +53,22 @@ enum class MainScreen {
 }
 
 @Composable
-fun AppNavigation() {
-    var isAuthenticated by remember { mutableStateOf(false) }
+fun AppNavigation(dependencyContainer: DependencyContainer) {
+    val scope = rememberCoroutineScope()
+    
+    // Create AuthViewModel
+    val authViewModel = remember {
+        AuthViewModel(
+            authRepository = dependencyContainer.authRepository,
+            coroutineScope = scope
+        )
+    }
+    
+    // Observe authentication state
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState(initial = false)
+    val authLoading by authViewModel.isLoading.collectAsState()
+    val authError by authViewModel.errorMessage.collectAsState()
+    
     var currentAuthScreen by remember { mutableStateOf(AuthScreen.Login) }
     var currentMainScreen by remember { mutableStateOf(MainScreen.Home) }
 
@@ -57,13 +76,16 @@ fun AppNavigation() {
         MainNavigation(
             currentScreen = currentMainScreen,
             onScreenChange = { currentMainScreen = it },
-            onLogout = { isAuthenticated = false }
+            onLogout = { authViewModel.signOut() },
+            dependencyContainer = dependencyContainer
         )
     } else {
         AuthNavigation(
             currentScreen = currentAuthScreen,
             onScreenChange = { currentAuthScreen = it },
-            onAuthSuccess = { isAuthenticated = true }
+            authViewModel = authViewModel,
+            isLoading = authLoading,
+            errorMessage = authError
         )
     }
 }
@@ -72,31 +94,34 @@ fun AppNavigation() {
 private fun AuthNavigation(
     currentScreen: AuthScreen,
     onScreenChange: (AuthScreen) -> Unit,
-    onAuthSuccess: () -> Unit
+    authViewModel: AuthViewModel,
+    isLoading: Boolean,
+    errorMessage: String?
 ) {
     when (currentScreen) {
         AuthScreen.Login -> {
             LoginScreen(
                 onLoginClick = { email, password ->
-                    // TODO: Implement login logic
-                    onAuthSuccess()
+                    authViewModel.signInWithEmail(email, password)
                 },
                 onSignUpClick = { onScreenChange(AuthScreen.SignUp) },
-                onForgotPasswordClick = { /* TODO: Implement forgot password */ },
+                onForgotPasswordClick = { /* TODO: Implement forgot password with email */ },
                 onGoogleSignInClick = {
-                    // TODO: Implement Google Sign-In logic
-                    onAuthSuccess()
-                }
+                    authViewModel.signInWithGoogle()
+                },
+                isLoading = isLoading,
+                errorMessage = errorMessage
             )
         }
 
         AuthScreen.SignUp -> {
             SignUpScreen(
                 onSignUpClick = { name, email, password ->
-                    // TODO: Implement sign up logic
-                    onAuthSuccess()
+                    authViewModel.signUpWithEmail(email, password, name)
                 },
-                onLoginClick = { onScreenChange(AuthScreen.Login) }
+                onLoginClick = { onScreenChange(AuthScreen.Login) },
+                isLoading = isLoading,
+                errorMessage = errorMessage
             )
         }
     }
@@ -107,7 +132,8 @@ private fun AuthNavigation(
 private fun MainNavigation(
     currentScreen: MainScreen,
     onScreenChange: (MainScreen) -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    dependencyContainer: DependencyContainer
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -223,18 +249,18 @@ private fun MainNavigation(
                         }
                         
                         MainScreen.MovieDetail -> {
+                            val movieDetailViewModel = remember {
+                                MovieDetailViewModel(
+                                    contentRepository = dependencyContainer.contentRepository,
+                                    userDataRepository = dependencyContainer.userDataRepository,
+                                    coroutineScope = scope
+                                )
+                            }
+                            
                             MovieDetailScreen(
-                                movie = mockMovie, // In real app, fetch by selectedMovieId
+                                movieId = selectedMovieId ?: "1", // Fallback to first movie
+                                viewModel = movieDetailViewModel,
                                 onBackClick = { onScreenChange(MainScreen.Home) },
-                                onWatchlistToggle = { isInWatchlist ->
-                                    // TODO: Update watchlist status
-                                },
-                                onWatchedToggle = { isWatched ->
-                                    // TODO: Update watched status
-                                },
-                                onRatingChange = { rating ->
-                                    // TODO: Save user rating
-                                },
                                 onAddToList = {
                                     onScreenChange(MainScreen.CustomLists)
                                 }

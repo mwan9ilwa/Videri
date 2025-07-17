@@ -6,13 +6,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.videri.data.di.DependencyContainer
 import com.example.videri.ui.navigation.AppNavigation
 import com.example.videri.ui.theme.VideriTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App() {
+fun App(dependencyContainer: DependencyContainer? = null) {
     VideriTheme {
         val backgroundColor = MaterialTheme.colorScheme.background
         val surfaceColor = MaterialTheme.colorScheme.surface
@@ -29,7 +30,9 @@ fun App() {
                 .safeDrawingPadding(),
             color = backgroundColor
         ) {
-            AppNavigation()
+            // Use provided container or fallback to mock for preview/testing
+            val container = dependencyContainer ?: DependencyContainer.createMockContainer()
+            AppNavigation(container)
         }
     }
 }
