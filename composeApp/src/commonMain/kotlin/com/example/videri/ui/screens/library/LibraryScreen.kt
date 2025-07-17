@@ -19,6 +19,7 @@ fun LibraryScreen(
     onMovieClick: (String) -> Unit,
     onTVShowClick: (String) -> Unit,
     onOpenProfile: () -> Unit,
+    onNavigateToCustomLists: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableStateOf(0) }
@@ -171,7 +172,7 @@ fun LibraryScreen(
                     icon = "📝",
                     action = {
                         VideriButton(
-                            onClick = { /* TODO: Create list */ },
+                            onClick = onNavigateToCustomLists,
                             variant = ButtonVariant.Primary
                         ) {
                             Text("Create List")

@@ -13,6 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
+import com.example.videri.ui.icons.LineIcons
+import com.example.videri.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -215,6 +218,43 @@ fun RatingBar(
                 } else {
                     Modifier
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun StarRating(
+    rating: Float,
+    maxRating: Int = 5,
+    onRatingChanged: ((Float) -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    starSize: Dp = 20.dp,
+    activeColor: Color = MaterialTheme.extendedColors.rating,
+    inactiveColor: Color = MaterialTheme.colorScheme.outline,
+    interactive: Boolean = false
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        repeat(maxRating) { index ->
+            val starRating = (index + 1).toFloat()
+            val isActive = starRating <= rating
+            
+            Icon(
+                imageVector = LineIcons.Star,
+                contentDescription = "Star $starRating",
+                tint = if (isActive) activeColor else inactiveColor,
+                modifier = Modifier
+                    .size(starSize)
+                    .then(
+                        if (interactive && onRatingChanged != null) {
+                            Modifier.clickable { onRatingChanged(starRating) }
+                        } else {
+                            Modifier
+                        }
+                    )
             )
         }
     }

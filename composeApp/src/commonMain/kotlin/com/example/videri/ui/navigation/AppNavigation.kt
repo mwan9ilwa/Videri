@@ -19,6 +19,13 @@ import com.example.videri.ui.screens.auth.LoginScreen
 import com.example.videri.ui.screens.auth.SignUpScreen
 import com.example.videri.ui.screens.home.HomeScreen
 import com.example.videri.ui.screens.library.LibraryScreen
+import com.example.videri.ui.screens.details.MovieDetailScreen
+import com.example.videri.ui.screens.details.TVShowDetailScreen
+import com.example.videri.ui.screens.lists.CustomListsScreen
+import com.example.videri.ui.screens.lists.CustomListDetailScreen
+import com.example.videri.ui.screens.recommendations.RecommendationsScreen
+import com.example.videri.ui.screens.home.Movie
+import com.example.videri.ui.screens.home.TVShow
 import com.example.videri.ui.icons.LineIcons
 import com.example.videri.ui.components.ProfileSideSheet
 import com.example.videri.ui.components.AppHeader
@@ -32,7 +39,12 @@ enum class AuthScreen {
 enum class MainScreen {
     Home,
     Library,
-    Calendar
+    Calendar,
+    MovieDetail,
+    TVShowDetail,
+    CustomLists,
+    CustomListDetail,
+    Recommendations
 }
 
 @Composable
@@ -100,6 +112,40 @@ private fun MainNavigation(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     
+    // Navigation state
+    var selectedMovieId by remember { mutableStateOf<String?>(null) }
+    var selectedTVShowId by remember { mutableStateOf<String?>(null) }
+    var selectedListId by remember { mutableStateOf<String?>(null) }
+    
+    // Mock data - in real app, this would come from a repository
+    val mockMovie = remember {
+        Movie(
+            id = "1",
+            title = "The Dark Knight",
+            posterUrl = null,
+            rating = 9.0f,
+            releaseYear = "2008",
+            description = "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+            genres = listOf("Action", "Crime", "Drama"),
+            isWatched = true
+        )
+    }
+    
+    val mockTVShow = remember {
+        TVShow(
+            id = "1",
+            title = "The Last of Us",
+            posterUrl = null,
+            rating = 8.7f,
+            releaseYear = "2023",
+            description = "After a global pandemic destroys civilization, a hardened survivor takes charge of a 14-year-old girl who may be humanity's last hope.",
+            genres = listOf("Drama", "Horror", "Thriller"),
+            status = "Ended",
+            episodeProgress = "S1E9",
+            isWatched = true
+        )
+    }
+    
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -122,16 +168,21 @@ private fun MainNavigation(
                         MainScreen.Home -> {
                             HomeScreen(
                                 onMovieClick = { movieId ->
-                                    // TODO: Navigate to movie details
+                                    selectedMovieId = movieId
+                                    onScreenChange(MainScreen.MovieDetail)
                                 },
                                 onTVShowClick = { tvShowId ->
-                                    // TODO: Navigate to TV show details
+                                    selectedTVShowId = tvShowId
+                                    onScreenChange(MainScreen.TVShowDetail)
                                 },
                                 onSeeAllClick = { category ->
                                     // TODO: Navigate to category screen
                                 },
                                 onOpenProfile = { 
                                     scope.launch { drawerState.open() } 
+                                },
+                                onNavigateToRecommendations = {
+                                    onScreenChange(MainScreen.Recommendations)
                                 }
                             )
                         }
@@ -139,13 +190,18 @@ private fun MainNavigation(
                         MainScreen.Library -> {
                             LibraryScreen(
                                 onMovieClick = { movieId ->
-                                    // TODO: Navigate to movie details
+                                    selectedMovieId = movieId
+                                    onScreenChange(MainScreen.MovieDetail)
                                 },
                                 onTVShowClick = { tvShowId ->
-                                    // TODO: Navigate to TV show details
+                                    selectedTVShowId = tvShowId
+                                    onScreenChange(MainScreen.TVShowDetail)
                                 },
                                 onOpenProfile = { 
                                     scope.launch { drawerState.open() } 
+                                },
+                                onNavigateToCustomLists = {
+                                    onScreenChange(MainScreen.CustomLists)
                                 }
                             )
                         }
@@ -155,18 +211,121 @@ private fun MainNavigation(
                                 onOpenProfile = { 
                                     scope.launch { drawerState.open() } 
                                 },
-                                onMovieClick = { /* TODO: Navigate to movie details */ },
-                                onTVShowClick = { /* TODO: Navigate to TV show details */ }
+                                onMovieClick = { movieId ->
+                                    selectedMovieId = movieId
+                                    onScreenChange(MainScreen.MovieDetail)
+                                },
+                                onTVShowClick = { tvShowId ->
+                                    selectedTVShowId = tvShowId
+                                    onScreenChange(MainScreen.TVShowDetail)
+                                }
+                            )
+                        }
+                        
+                        MainScreen.MovieDetail -> {
+                            MovieDetailScreen(
+                                movie = mockMovie, // In real app, fetch by selectedMovieId
+                                onBackClick = { onScreenChange(MainScreen.Home) },
+                                onWatchlistToggle = { isInWatchlist ->
+                                    // TODO: Update watchlist status
+                                },
+                                onWatchedToggle = { isWatched ->
+                                    // TODO: Update watched status
+                                },
+                                onRatingChange = { rating ->
+                                    // TODO: Save user rating
+                                },
+                                onAddToList = {
+                                    onScreenChange(MainScreen.CustomLists)
+                                }
+                            )
+                        }
+                        
+                        MainScreen.TVShowDetail -> {
+                            TVShowDetailScreen(
+                                tvShow = mockTVShow, // In real app, fetch by selectedTVShowId
+                                onBackClick = { onScreenChange(MainScreen.Home) },
+                                onWatchlistToggle = { isInWatchlist ->
+                                    // TODO: Update watchlist status
+                                },
+                                onWatchedToggle = { isWatched ->
+                                    // TODO: Update watched status
+                                },
+                                onEpisodeWatchedToggle = { episodeId, isWatched ->
+                                    // TODO: Update episode watched status
+                                },
+                                onRatingChange = { rating ->
+                                    // TODO: Save user rating
+                                },
+                                onAddToList = {
+                                    onScreenChange(MainScreen.CustomLists)
+                                }
+                            )
+                        }
+                        
+                        MainScreen.CustomLists -> {
+                            CustomListsScreen(
+                                onBackClick = { onScreenChange(MainScreen.Library) },
+                                onListClick = { listId ->
+                                    selectedListId = listId
+                                    onScreenChange(MainScreen.CustomListDetail)
+                                },
+                                onCreateList = { name, description, isPublic ->
+                                    // TODO: Create new list
+                                },
+                                onDeleteList = { listId ->
+                                    // TODO: Delete list
+                                }
+                            )
+                        }
+                        
+                        MainScreen.CustomListDetail -> {
+                            CustomListDetailScreen(
+                                listId = selectedListId ?: "1",
+                                onBackClick = { onScreenChange(MainScreen.CustomLists) },
+                                onMovieClick = { movieId ->
+                                    selectedMovieId = movieId
+                                    onScreenChange(MainScreen.MovieDetail)
+                                },
+                                onTVShowClick = { tvShowId ->
+                                    selectedTVShowId = tvShowId
+                                    onScreenChange(MainScreen.TVShowDetail)
+                                },
+                                onAddContent = {
+                                    // TODO: Navigate to content selection
+                                },
+                                onRemoveContent = { contentId, contentType ->
+                                    // TODO: Remove content from list
+                                }
+                            )
+                        }
+                        
+                        MainScreen.Recommendations -> {
+                            RecommendationsScreen(
+                                onBackClick = { onScreenChange(MainScreen.Home) },
+                                onMovieClick = { movieId ->
+                                    selectedMovieId = movieId
+                                    onScreenChange(MainScreen.MovieDetail)
+                                },
+                                onTVShowClick = { tvShowId ->
+                                    selectedTVShowId = tvShowId
+                                    onScreenChange(MainScreen.TVShowDetail)
+                                },
+                                onRefreshRecommendations = {
+                                    // TODO: Refresh recommendations
+                                }
                             )
                         }
                     }
 
-                    // Floating Dock - Overlay at bottom
-                    FloatingDock(
-                        currentScreen = currentScreen,
-                        onScreenChange = onScreenChange,
-                        modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter)
-                    )
+                    // Floating Dock - Only show on main screens
+                    if (currentScreen in listOf(MainScreen.Home, MainScreen.Library, MainScreen.Calendar)) {
+                        FloatingDock(
+                            currentScreen = currentScreen,
+                            onScreenChange = onScreenChange,
+                            modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter)
+                        )
+                    }
                 }
             }
         }

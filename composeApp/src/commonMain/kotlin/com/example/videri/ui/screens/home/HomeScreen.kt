@@ -50,6 +50,7 @@ fun HomeScreen(
     onTVShowClick: (String) -> Unit,
     onSeeAllClick: (String) -> Unit,
     onOpenProfile: () -> Unit,
+    onNavigateToRecommendations: () -> Unit = {},
     modifier: Modifier = Modifier,
     userName: String = "User"
 ) {
@@ -321,34 +322,52 @@ fun HomeScreen(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
-                Text(
-                    text = "Your Stats",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.SemiBold
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatItem(
-                        label = "Movies Watched",
-                        value = "127",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    StatItem(
-                        label = "TV Shows",
-                        value = "23",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    StatItem(
-                        label = "Watchlist",
-                        value = "45",
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+                    Column {
+                        Text(
+                            text = "Your Stats",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            StatItem(
+                                label = "Movies Watched",
+                                value = "127",
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            StatItem(
+                                label = "TV Shows",
+                                value = "23",
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                            StatItem(
+                                label = "Watchlist",
+                                value = "45",
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                    
+                    VideriButton(
+                        onClick = onNavigateToRecommendations,
+                        variant = ButtonVariant.Secondary
+                    ) {
+                        Text(
+                            text = "Recommendations",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
                 }
             }
         }
